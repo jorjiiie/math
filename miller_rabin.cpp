@@ -15,7 +15,7 @@ long long fpow(long long a, long long b, long long m) {
 		a=a*a%m;
 		b>>=1;
 	}
-	std::cout << ret%m << "\n";
+	// std::cout << ret%m << "\n";
 	return ret%m;
 }
 bool test(long long a, long long n) {
@@ -37,16 +37,15 @@ bool test(long long a, long long n) {
 	return false;
 }
 bool miller_rabin(long long num, int tests) {
-	// won't work for even nums (if you are testing primes for even numbers you don't need to be reading this)
 
 	std::uniform_int_distribution<> dist(1,num-1);
 	for (int i = 0; i < tests; i++) {
 		long long cur = dist(rng);
 		if (test(cur,num)) return false;
 	}
-	return true;
+	return true; // likely
 }
 int main() {
 
-	std::cout << miller_rabin(70368744177643LL,TESTS);
+	std::cout << miller_rabin(2000,TESTS);
 }
