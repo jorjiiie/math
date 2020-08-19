@@ -10,10 +10,12 @@ const int TESTS=50; // idk clrs says this is good so i use it lol
 long long fpow(long long a, long long b, long long m) {
 	long long ret = 1LL;
 	while(b) {
-		if (b&1) ret=a*a%m;
+		// std::cout <<a  << " a\n";
+		if (b&1) ret=ret*a%m;
 		a=a*a%m;
 		b>>=1;
 	}
+	std::cout << ret%m << "\n";
 	return ret%m;
 }
 bool test(long long a, long long n) {
@@ -35,16 +37,16 @@ bool test(long long a, long long n) {
 	return false;
 }
 bool miller_rabin(long long num, int tests) {
-	std::cout << num << "\n";
+	// won't work for even nums (if you are testing primes for even numbers you don't need to be reading this)
+
 	std::uniform_int_distribution<> dist(1,num-1);
 	for (int i = 0; i < tests; i++) {
 		long long cur = dist(rng);
-		std::cout << cur << "\n";
 		if (test(cur,num)) return false;
 	}
 	return true;
 }
 int main() {
 
-	std::cout << miller_rabin(1LL*2147483647,TESTS);
+	std::cout << miller_rabin(70368744177643LL,TESTS);
 }
