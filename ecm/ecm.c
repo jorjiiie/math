@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
+#include <stime.h>
 #include "mpz_aprcl.c"
 // #include "ecm.h"
 
@@ -161,9 +162,30 @@ int ECM(mpz_t number) {
 
 	// choose random a and (x,y) for y^2 = x^3 + ax + b
 	// set b = y^2-x^3-ax
+	gmp_randomstate_t state;
+
+	gmp_randinit_mt(state);
+	gmp_randseed_ui(state, (long) time(0));
+
+	point p;
+	point_init(&p);
+
+	//initialize p.x, p.y and x
+	mpz_urandomm(CURVE_A,state,N);
+	mpz_urandomm(p.x,state,N);
+	mpz_urandomm(p.y,state,N);
+
+	mpz_powm_ui(TEMP_T,p.x,3,N);
+	mpz_powm_ui(TEMP_R,p.y,2,N);
+	mpz_mul(TEMP_PROD,CURVE_A,p.x);
+
+	mpz_sub(TEMP_R,TEMP_R,TEMP_T);
+	mpz_sub(TEMP_R,TEMP_R,TEMP_PROD);
+
+	mpz_mod(CURVE_B,TEMP_R,N);
+	assert(is_on_curve(&p)>0);
+
 	
-
-
 	return -1;
 	clear_all();
 }
