@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
-#include <stime.h>
+#include <time.h>
 #include "mpz_aprcl.c"
 // #include "ecm.h"
 
@@ -21,14 +21,18 @@ typedef struct point {
 	mpz_t x,y;
 } point;
 
-mpz_t GLOBAL_Y,GLOBAL_X;
+mpz_t GLOBAL_Y,GLOBAL_X, BOUND_A;
 mpz_t TOP, BOTTOM, TEMP_T, TEMP_R, TEMP_PROD, SLOPE, N;
 
 mpz_t CURVE_A, CURVE_B;
 
+int BOUND_A_LOG;
+int NUMBER_OF_CURVES=5;
+
 void init_all() {
 	mpz_init(GLOBAL_Y);
 	mpz_init(GLOBAL_X);
+	mpz_init(BOUND_A);
 	mpz_init(TOP);
 	mpz_init(BOTTOM);
 	mpz_init(TEMP_T);
@@ -43,6 +47,7 @@ void init_all() {
 void clear_all() {
 	mpz_clear(GLOBAL_Y);
 	mpz_clear(GLOBAL_X);
+	mpz_clear(BOUND_A);
 	mpz_clear(TOP);
 	mpz_clear(BOTTOM);
 	mpz_clear(TEMP_T);
@@ -109,6 +114,7 @@ int point_addition(point *a, point *b, mpz_t factor) {
 		mpz_sub(BOTTOM,b->x,a->x);
 
 		if (mpz_invert(SLOPE,SLOPE,N)==0) {
+			gmp_printf("%Zd CANNOT INVERT\n",SLOPE);
 			mpz_gcd(factor,SLOPE,N);
 			return 1;
 		}
@@ -138,10 +144,12 @@ int point_addition(point *a, point *b, mpz_t factor) {
 }
 
 int point_multiplication(point *a, mpz_t b, mpz_t factor) {
-	// sets a to bA
+	// sets A to bA
 	point c;
 	point_init(&c);
-	while (mpz_cmp(b,0)>0) {
+	LINECHECK(__LINE__);
+	while (mpz_cmp_ui(b,0)>0) {
+		LINECHECK(__LINE__);
 		if (mpz_odd_p(b)!=0) {
 			if (point_addition(&c,a,factor)>0) {
 				// uhh this means uninvertible
@@ -155,14 +163,29 @@ int point_multiplication(point *a, mpz_t b, mpz_t factor) {
 	*a = c;
 	return -1;
 }
+int blog(int n) {
+	int lg = 0;
+	while (n>1) {
+		lg++;
+		n>>=1;
+	}
+	return lg;
+}
+int highest_power(int n) {
+	int lg = blog(n);
+	return (BOUND_A_LOG/lg);
+}
+
 
 int ECM(mpz_t number) {
-	mpz_set(number,N);
 	init_all();
-
+	mpz_set(N,number);
+	mpz_set_str(BOUND_A,"10",10);
+	FILE *IN = fopen("PRIMES.txt","r");
+	
 	// choose random a and (x,y) for y^2 = x^3 + ax + b
 	// set b = y^2-x^3-ax
-	gmp_randomstate_t state;
+	gmp_randstate_t state;
 
 	gmp_randinit_mt(state);
 	gmp_randseed_ui(state, (long) time(0));
@@ -170,30 +193,57 @@ int ECM(mpz_t number) {
 	point p;
 	point_init(&p);
 
-	//initialize p.x, p.y and x
-	mpz_urandomm(CURVE_A,state,N);
-	mpz_urandomm(p.x,state,N);
-	mpz_urandomm(p.y,state,N);
+	mpz_t factor;
+	mpz_init(factor);
 
-	mpz_powm_ui(TEMP_T,p.x,3,N);
-	mpz_powm_ui(TEMP_R,p.y,2,N);
-	mpz_mul(TEMP_PROD,CURVE_A,p.x);
+	gmp_printf("N is %Zd\n",N);
+	for (int i=0;i<NUMBER_OF_CURVES;i++) {
+		//initialize p.x, p.y and x
 
-	mpz_sub(TEMP_R,TEMP_R,TEMP_T);
-	mpz_sub(TEMP_R,TEMP_R,TEMP_PROD);
-
-	mpz_mod(CURVE_B,TEMP_R,N);
-	assert(is_on_curve(&p)>0);
-
+		LINECHECK(__LINE__);
+		mpz_urandomm(CURVE_A,state,N);
+		mpz_urandomm(p.x,state,N);
+		mpz_urandomm(p.y,state,N);
 	
-	return -1;
-	clear_all();
+		mpz_powm_ui(TEMP_T,p.x,3,N);
+		mpz_powm_ui(TEMP_R,p.y,2,N);
+		mpz_mul(TEMP_PROD,CURVE_A,p.x);
+
+		LINECHECK(__LINE__);
+		mpz_sub(TEMP_R,TEMP_R,TEMP_T);
+		mpz_sub(TEMP_R,TEMP_R,TEMP_PROD);
+
+		mpz_mod(CURVE_B,TEMP_R,N);
+		assert(is_on_curve(&p)>0);
+		int next_prime = 0;
+		
+		gmp_printf("BOUND_A %Zd\n",BOUND_A);
+		while (mpz_cmp_ui(BOUND_A,next_prime)>0) {
+			LINECHECK(__LINE__);
+			fscanf(IN,"%d",&next_prime);
+			LINECHECK(__LINE__);
+			mpz_set_si(GLOBAL_Y,next_prime);
+			mpz_pow_ui(GLOBAL_Y,GLOBAL_Y,highest_power(next_prime));
+			LINECHECK(__LINE__);
+			gmp_printf("%Zd %Zd moved %Zd %d\n",p.x,p.y,GLOBAL_Y,next_prime);
+			if(point_multiplication(&p,GLOBAL_Y,factor)>0&&mpz_cmp(factor,N)!=0) {
+				gmp_printf("Factor of %Zd is %Zd\n",N,factor);
+				goto end;
+			}
+			assert(is_on_curve(&p)>0);
+		}
+
+	}
+	
+	
+	end:	
+		clear_all();
 }
 int main() {
 
-	init_all();
-
-
+	mpz_init_set_str(BOUND_A,"10000000",10);
+	
+	/*
 	mpz_set_si(CURVE_B,15);
 	mpz_set_si(CURVE_A,9);
 
@@ -217,4 +267,8 @@ int main() {
 
 	gmp_printf("%Zd %Zd\n",a.x,a.y);
 
+	*/
+	mpz_t test;
+	mpz_init_set_str(test,"123781218371232",10);
+	ECM(test);
 }
