@@ -12,11 +12,8 @@
  * Ryan Zhu 
  * December 5, 2020
  * Elliptic curve factorization
- * I have no idea what I'm doing, essentially I have been copying wikipedia's formula's and whatnot
- * I don't understand why anything works, I just get that it does
- * Pollard's p-1 somewhat makes sense, but the order of elliptic curves doesn't really :(
- * Should be able to factor out ~30 digit factors from what I've read
- * Currently unfinished (stage 1 only)
+ * I don't know why this is so slow but it works kinda not really :(
+ * It's beaten by Pollard's Rho lol so I'm doing something wrong
 */
 typedef struct point {
 	mpz_t x,y;
