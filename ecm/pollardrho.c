@@ -114,7 +114,7 @@ int main() {
 	mpz_set_str(a,"399899999999999",10);
 	mpz_set_str(b,"493935332521159",10);
 	//mpz_mul(test,a,b);
-	mpz_init_set_str(test,"18197496879513753447134071421",10);
+	mpz_init_set_str(test,"19326223710861634601",10);
 	int cnt = 0;
 	rhofactor(test,arr,&cnt);
 	printf("num has %d factors\n",cnt);
