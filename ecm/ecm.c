@@ -19,7 +19,8 @@
  * Stage two might be implemented as Brent's Birthday Paradox or the standard p-1 continuation 
 */
 typedef struct point {
-	mpz_t x,y;
+	//defined in projective coordinates (X,,Z) (y is ommitted because it's irrelevant in calculations)
+	mpz_t x,z;
 } point;
 
 mpz_t GLOBAL_Y,GLOBAL_X, BOUND_A;
@@ -84,35 +85,47 @@ void copy_point(point *to, point *base) {
 	mpz_set(to->y,base->y);
 }
 
-int is_on_curve(point *p) {
-
-	//temp_t = y^2, temp_r = x^3 + ax + b
-	mpz_powm_ui(TEMP_T,p->y,2,N);
-	
-	mpz_powm_ui(TEMP_R,p->x,3,N);
-	mpz_add(TEMP_R,TEMP_R,CURVE_B);
-	mpz_mul(TEMP_PROD,p->x,CURVE_A);
-	mpz_add(TEMP_R,TEMP_R,TEMP_PROD);
-
-	mpz_mod(TEMP_R,TEMP_R,N);
-	mpz_mod(TEMP_T,TEMP_T,N);
-	return (mpz_cmp(TEMP_R,TEMP_T)==0?1:-1);
-
-}
-
-int point_addition(point *a, point *b, mpz_t factor) {
-	//sets a to a + b	
+void point_addition(point *a, point *b, point *one) {
+	// sets a to a + b	
+	// a = kP, b = (k+1)P - this has to be checked in multiplication
+	// this isn't universal since we need a-b for this to work (which is always 1 in a montgomery ladder so it's easy)
+	// X (m+n) = Z (m-n) * [ {X(m) - Z(m)}{(X(n) + Z(n)} + {X(m)+Z(M)}{X(n)-Z(n)}]^2
+	// Z (m+n) = X (m-n) * [ "" - "" ] ^2
 	start = clock();
-	// gmp_printf("%Zd %Zd %Zd %Zd\n",a->x,a->y,b->x,b->y);
+	mpz_sub(TEMP_T,b->x,b->z);
+	mpz_add(TEMP_R,a->x,a->z);
+	mpz_mul(TEMP_PROD,TEMP_T,TEMP_R);
+	mpz_mod(TEMP_PROD,TEMP_PROD,N); // is equal to first part of the equation
+
+	mpz_add(TEMP_T,b->x,b->z);
+	mpz_sub(TEMP_R,a->x,a->z);
+	mpz_mul(GLOBAL_X,TEMP_T,TEMP_R);
+	mpz_mod(GLOBAL_X,GLOBAL_X,N);
+
+	mpz_add(TEMP_T,GLOBAL_X,TEMP_PROD);
+	mpz_powm_ui(TEMP_T,TEMP_T,2,N);
+
+	mpz_mul(c->x,one->z,TEMP_T);
+
+	mpz_sub(TEMP_T,TEMP_PROD,GLOBAL_X);
+	mpz_powm_ui(TEMP_T,TEMP_T,2,N);
+
+	mpz_mul(c->z,one->x,TEMP_T);
+
+	mpz_mod(c->x,c->x,N);
+	mpz_mod(c->z,c->z,N);
 
 	*a=c;
 	end = clock();
 	ADDITION_TIME+=(double)(end-start)/CLOCKS_PER_SEC;
-	return -1;
 
 }
 
-int point_multiplication(point *a, mpz_t b, mpz_t factor) {
+int point_double(point *a) {
+	
+}
+
+int point_multiplication(point *a, mpz_t b) {
 	// sets A to bA
 	// point c;
 	// point_init(&c);
@@ -127,7 +140,7 @@ int point_multiplication(point *a, mpz_t b, mpz_t factor) {
 				// factor has the factor
 				return 1;
 			}
-		}         
+		}   
 		// point double
 		point_addition(a,a,factor);
 		mpz_tdiv_q_2exp(b,b,1);

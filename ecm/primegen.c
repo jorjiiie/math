@@ -13,7 +13,7 @@ int main() {
 	for (long long i=3;i<=1e8;i+=2) {
 		if (isPrime[i/2]) {
 			cnt++;
-			fprintf(OUT,"%lld ",i);
+			// fprintf(OUT,"%lld ",i);
 			for (long long j=i*i;j<=1e8;j+=i*2) {
 				isPrime[j/2]=0;
 			}
