@@ -122,7 +122,7 @@ void point_addition(point *a, point *b, point *one) {
 }
 
 int point_double(point *a) {
-	
+
 }
 
 int point_multiplication(point *a, mpz_t b) {

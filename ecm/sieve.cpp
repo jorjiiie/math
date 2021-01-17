@@ -45,6 +45,7 @@ int main() {
 			h = *wheel.upper_bound(h);
 		}
 		auto it = wheel.find(h);
+		// auto it = wheel.find(BOUND/p); // i think this performes better
 		while (*it > 1) {
 			it--;
 			wheel.erase((*it)*p);

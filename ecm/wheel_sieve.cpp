@@ -35,7 +35,7 @@ void node_insert(ll data) { // insert onto head
 	newnode->next=NULL;
 
 	HEAD->next=newnode;
-	newnode->prev=HEAD;
+	newnode->prev=HEAD;    
 	HEAD=newnode;
 }
 void node_remove(node *toRemove) { // we remove the node itself so 
@@ -90,7 +90,7 @@ int main() {
 			}
 		}
 		current = TAIL;
-		if (!overflow) {
+		if (!overflow||BOUND>=N) {
 			while (current!=NULL) {
 				while ((it=composite.find(current->num))!=composite.end()) {
 					// number is composite
@@ -99,7 +99,7 @@ int main() {
 					node_remove(current);
 					current = temp;
 				} 
-				if (!overflow&&current->num+prod<BOUND) {
+				if (!overflow&&current->num+prod<=BOUND) {
 					// prod hasn't overflowed yet
 					// if it has it's stupidly big so it doesn't matter
 					// pretty obvious that this'll be sorted 
@@ -120,8 +120,8 @@ int main() {
 		if (current->prev!=NULL) current=current->prev;
 		while (current!=NULL&&(current->num)>=1) {
 			while ((it=composite.find(current->num))!=composite.end()) {
-					// number is composite
-					composite.erase(it);
+				// number is composite
+				composite.erase(it);
 				temp = current->prev;
 				node_remove(current);
 				current = temp;
@@ -130,9 +130,6 @@ int main() {
 			if (current!=NULL) composite.insert(p*(current->num));
 			else break;
 			current=current->prev;
-			
-			
-			
 		}
 		if (!overflow) {
 			if (prod*p<prod) {
@@ -145,7 +142,7 @@ int main() {
 
 		current = TAIL->next;
 		while (current!=NULL&&(it=composite.find(current->num))!=composite.end()) {
-					// number is composite
+			// number is composite
 			composite.erase(it);
 			temp = current->next;
 			node_remove(current);
