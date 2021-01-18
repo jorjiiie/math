@@ -10,4 +10,7 @@ int main() {
 	a.print();
 	int_2240::badNumber b = c-d;
 	b.print();
+
+	std::cout << "ASDJASD\n\n\n\n";
+	// pow_two[1].print();
 }

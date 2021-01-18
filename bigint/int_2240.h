@@ -28,6 +28,7 @@ class int_2240 {
 				badNumber();
 				badNumber(std::string);
 				badNumber(const badNumber&);
+				badNumber(const char*);
 
 				badNumber operator-() const;
 
@@ -40,6 +41,8 @@ class int_2240 {
 				badNumber operator/(const badNumber&);
 				badNumber& operator/=(const badNumber&);
    
+   				bool operator<(const badNumber&); // i think this is all we need?
+
 				void print();
 				void printraw();
 		};
