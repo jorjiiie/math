@@ -94,7 +94,53 @@ mint& mint::operator*=(const mint& k) {
 	this->sign^=k.sign; 
 	return *this;
 }
+mint mint::operator/(const mint& k) {
+	mint c = *this;
+	c/=k;
+	return c;
+}
+mint& mint::operator/=(const mint& k) {
+	if (*this<k) { 
+		// if its smaller then its zero
+		this->num.clear();
+		this->sign=false;
+		return *this;
+	}
+	// algorithm is ripped off wikipedia
+	mint c = k;
+	c.clean();
+	// this is already clean
+	int n = this->num.size();
+	int m = c.num.size();
+	mint q=0,r;
+	long long d;
+	// initialize d (current) to first m-1 digits of n
+	for (int i=0;i<m-1;i++) {
+		r.num.push_back(this->.num[i]);
+	}
+	for (int i=0;i<=n-m;i++) {
+		// r < 2^31
+		d = r.num[0];
+		d<<31; // shift over
+		d+=this->num[i+m-1];
+		// time to guess the divisor thing
+		// essentially divisor can't be greater than 2^32 so it's ok to have ll but the product can be big so we should declare a big one
+		// binary search ig
+		long long HIGH = 1LL<<31;
+		long long LOW = 0;
+		long long MID = (HIGH+LOW)/2;
+		while (HIGH>LOW) {
+			mint prod = d*mid;
+			if (prod>0) {
+				// can try to be bigger
+				LOW = MID+1;
+			} else {
+				HIGH = MID-1;
+			}		
+		}
+		// 
 
+}
 mint mint::operator+(const long long k) {
 	mint c = *this;
 
@@ -135,10 +181,47 @@ bool mint::operator[](int k) {
 mint::~mint() {
 	num.clear();
 }
-
-void mint::changeBit(int i, bool b) {
-
+bool mint::operator<(const mint& k) {
+	return cmp(k)==-1;
+}
+bool mint::operator>(const mint&k) {
+	return cmp(k)==1;
+}
+bool mint::operator<=(const mint& k) {
+	int res = cmp(k);
+	return res==-1||res==0;
+}
+bool mint::operator>=(const mint& k) {
+	int res = cmp(k);
+	return res==1||res==0;
+}
+bool mint::oeprator==(const mint& k) {
+	return cmp(k)==0;
+}
+int cmp(const mint& k) {
+	// clear out empty cells tho first?
+	*this.clean();
+	mint c = k;
+	c.clean();
+	if (this->num.size()<c.num.size()) return -1; // less
+	if (this->num.size()>c.num.size()) return 1; // greater
+	for (int i=this->num.size()-1;i>=0;i--) {
+		if (this->num[i]<c.num[i]) return -1;
+		if (this->num[i]>c.num[i]) return 1;
+	}
+	return 0;
+}
+void mint::changeBit(int k, bool b) {
+	// will not check for oob 
+	int block = k/31;
+	k-=block*31;
+	num[block]&=(~0&((int)b<<k));
 }  
+void mint::clean() {
+	while (this->num.back()==0&&!(this->num.empty())) {
+		this->num.pop_back();
+	}
+}
 std::ostream& operator<<(std::ostream& stream, const mint& k) {
 	// temporary lol
 	for (unsigned int i : k.num) {

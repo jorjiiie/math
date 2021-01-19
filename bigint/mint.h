@@ -57,8 +57,10 @@ class mint {
 		bool operator<=(const mint&);
 		bool operator>=(const mint&);
 		bool operator==(const mint&);
-
+	
+		int cmp(const mint&);
 		void changeBit(int, bool);
+		void clean();
 
 		mint slow_mult(const mint&);
 
