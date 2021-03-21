@@ -7,6 +7,11 @@
 #include <algorithm>
 #include <assert.h>
 
+// macros lol
+#define fi first
+#define se second
+
+
 class mint {
 	private:
 		std::vector<unsigned int> num;
@@ -41,6 +46,9 @@ class mint {
 		mint operator%(const long long);
 		mint& operator%=(const long long);
 
+		// since division calculates both, we may as well have it like this
+		mint helper(const mint&, bool);
+
 		// for obvious reasons I'm not supporting this with anything beyond int
 		mint operator>>(const int);
 		mint& operator>>=(const int);
@@ -57,12 +65,16 @@ class mint {
 		bool operator<=(const mint&);
 		bool operator>=(const mint&);
 		bool operator==(const mint&);
-	
+		bool operator!=(const mint&);
+
 		int cmp(const mint&);
 		void changeBit(int, bool);
 		void clean();
 
 		mint slow_mult(const mint&);
+
+		void shiftx(int);
+		void lshiftx(int);
 
 		friend std::ostream& operator<< (std::ostream&, const mint&);
 };

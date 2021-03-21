@@ -69,26 +69,36 @@ mint mint::operator*(const mint& k) {
 	return c;
 }
 mint& mint::operator*=(const mint& k) {
-	// for now we will impl a slow multiplication, will be moved to its own method later
-	std::vector<unsigned long long> tmp;
+	// for now we will impl a slow multiplication
+	std::vector<std::pair<unsigned long long, unsigned long long> > tmp; // we have two so we can handle overflow better
+	// it's essentially a two-leg 128 bit number
+
 	// tmp.push_back(0);
 	for (int i=0;i<this->num.size();i++) {
 		for (int j=0;j<k.num.size();j++) {
 			while (tmp.size()<1+i+j) {
 				// make the size right
-				tmp.push_back(0); 
+				tmp.push_back({0,0}); 
 			}
-			tmp[i+j]+=(unsigned long long)this->num[i]*k.num[j];
+			tmp[i+j].fi+=(unsigned long long)this->num[i]*k.num[j];
+			tmp[i+j].se+=(tmp[i+j].fi)>>31;
+			tmp[i+j].fi&=0x7FFFFFFF;
 		}
 	}
 	// then do addition
 
 	unsigned long long carry=0; 
+	int current = 0;
 	// realistically carry can be like really big so can't use int 
 	for (int i=0;i<tmp.size();i++) {
-		tmp[i]+=carry;
-		carry = tmp[i]>>31;
-		this->num[i]=(unsigned int) (tmp[i]&0x7FFFFFFF);
+		tmp[i].fi+=carry;
+		carry = tmp[i].fi>>31;
+		carry+=tmp[i].se;
+		this->num[i]=(unsigned int) (tmp[i].fi&0x7FFFFFFF);
+	}
+	while (carry) {
+		num.push_back(carry&0x7FFFFFFF);
+		carry>>=31;
 	}
 	// always positive if they are the same sign and negative otherwise
 	this->sign^=k.sign; 
@@ -100,6 +110,72 @@ mint mint::operator/(const mint& k) {
 	return c;
 }
 mint& mint::operator/=(const mint& k) {
+	*this = (*this).helper(k, false);
+	return *this;
+}
+mint mint::operator%(const mint& k) {
+	mint c = *this;
+	c%=k;
+	return c;
+}
+mint mint::operator%=(const mint& k) {
+	*this = (*this).helper(k,true);
+	return *this;
+}
+mint mint::operator+(const long long k) {
+	mint c = *this;
+	c+=k;
+	return c;
+}
+mint& mint::operator+=(const long long k) {
+	// do smth
+	// LOL LAZY SOLUTION:
+	mint tmp = k;
+	*this+=k;
+	return *this;
+}
+mint mint::operator*(const long long k) {
+	mint c = *this;
+	c-=k;
+	return c;
+}
+mint& mint::operator*=(const long long k) {
+	// do smth
+	return *this;
+}
+mint mint::helper(const mint& quotient, bool remainder) {
+	mint z = 0LL;
+	mint x = *this;
+	bool eq = x==z; // why do I have to do this cuz otherwise it says it'll get changed which is true but wtf
+	assert(!eq && "DIVISION BY ZERO");
+
+	// if |x| < |k| then obviously its zero
+	if (x<k) {
+		this->num.clear();
+		this->sign=false;
+		return *this;
+	}
+	mint divisor = k;
+	divisor.clean();
+	(*this).clean();
+	// Im not going to follow wikipedia for the rest of this so 
+	// I'll just think ab it and implement a really bad long division
+	mint current = 0LL;
+	mint quotient = 0LL;
+	for (int i=this->num.size()-1;i>=k.num.size();i--) {
+		// uwu
+		current.shiftx(1);
+		current+=k;
+		if (current<k) {
+			// add 0 to the quotient?
+			quotient.shiftx(1);
+		}
+		// else we try to figure out the quotient part up top;
+		
+	}
+	if (helper) return current;
+	return quotient;
+	/*
 	if (*this<k) { 
 		// if its smaller then its zero
 		this->num.clear();
@@ -118,46 +194,7 @@ mint& mint::operator/=(const mint& k) {
 	for (int i=0;i<m-1;i++) {
 		r.num.push_back(this->.num[i]);
 	}
-	for (int i=0;i<=n-m;i++) {
-		// r < 2^31
-		d = r.num[0];
-		d<<31; // shift over
-		d+=this->num[i+m-1];
-		// time to guess the divisor thing
-		// essentially divisor can't be greater than 2^32 so it's ok to have ll but the product can be big so we should declare a big one
-		// binary search ig
-		long long HIGH = 1LL<<31;
-		long long LOW = 0;
-		long long MID = (HIGH+LOW)/2;
-		while (HIGH>LOW) {
-			mint prod = d*mid;
-			if (prod>0) {
-				// can try to be bigger
-				LOW = MID+1;
-			} else {
-				HIGH = MID-1;
-			}		
-		}
-		// 
-
-}
-mint mint::operator+(const long long k) {
-	mint c = *this;
-
-	return c;
-}
-mint& mint::operator+=(const long long k) {
-	// do smth
-	return *this;
-}
-mint mint::operator*(const long long k) {
-	mint c = *this;
-
-	return c;
-}
-mint& mint::operator*=(const long long k) {
-	// do smth
-	return *this;
+	*/
 }
 mint mint::operator>>(const int k) {
 	// right shift k bits
@@ -195,19 +232,23 @@ bool mint::operator>=(const mint& k) {
 	int res = cmp(k);
 	return res==1||res==0;
 }
-bool mint::oeprator==(const mint& k) {
+bool mint::operator==(const mint& k) {
 	return cmp(k)==0;
 }
-int cmp(const mint& k) {
+bool mint::operator!=(const mint& k) {
+	return cmp(k)!=0;
+}
+int mint::cmp(const mint& k) {
 	// clear out empty cells tho first?
-	*this.clean();
 	mint c = k;
+	mint b = *this;
+	b.clean();
 	c.clean();
-	if (this->num.size()<c.num.size()) return -1; // less
-	if (this->num.size()>c.num.size()) return 1; // greater
-	for (int i=this->num.size()-1;i>=0;i--) {
-		if (this->num[i]<c.num[i]) return -1;
-		if (this->num[i]>c.num[i]) return 1;
+	if (b.num.size()<c.num.size()) return -1; // less
+	if (b.num.size()>c.num.size()) return 1; // greater
+	for (int i=b.num.size()-1;i>=0;i--) {
+		if (b.num[i]<c.num[i]) return -1;
+		if (b.num[i]>c.num[i]) return 1;
 	}
 	return 0;
 }
@@ -218,7 +259,23 @@ void mint::changeBit(int k, bool b) {
 	num[block]&=(~0&((int)b<<k));
 }  
 void mint::clean() {
-	while (this->num.back()==0&&!(this->num.empty())) {
+	while (!(this->num.empty())&&this->num.back()==0) {
+		this->num.pop_back();
+	}
+}
+void mint::shiftx(int x) {
+	// multiplies by base (2^31)
+	if (x<0) {
+		(*this).lshiftx(-x);
+		return;
+	}
+	for (int i=0;i<x;i++)
+		this->num.push_back(0);
+	std::rotate(this->num.rbegin(), this->num.rbegin() + x, this->num.rend());
+}
+void mint::lshiftx(int x) {
+	std::rotate(this->num.begin(),this->num.begin()+x, this->num.end());
+	while (x--&&!this->num.empty()) {
 		this->num.pop_back();
 	}
 }
@@ -231,8 +288,15 @@ std::ostream& operator<<(std::ostream& stream, const mint& k) {
 }
 int main() {
 	std::cout<<"HASDH\n";
-	mint a = 34+(1LL<<34);
+	mint a = (1<<30);
 	std::cout << a << "\n" << a[1] << "\n";
-	mint b = 200;
+	mint b = (1<<30);
 	mint c = a*b;
+	mint d = 16;
+	c*=d;
+	std::cout << c << "\n";
+	c.shiftx(1);
+	std::cout << c << "\n";
+	c.shiftx(-2);
+	std::cout << c << "\n";
 }
