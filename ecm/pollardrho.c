@@ -1,5 +1,5 @@
-#include <gmp.h>
 #include <stdio.h>
+#include <gmp.h>
 #include <time.h>
 #include "mpz_aprcl.h"
 #include "mpz_aprcl.c"
