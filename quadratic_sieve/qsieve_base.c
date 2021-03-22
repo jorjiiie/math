@@ -1,7 +1,6 @@
 #ifndef QSIEVE_H
 
 #include "qsieve.h"
-#define QSIEVE_H
 
 #endif
 

@@ -1,3 +1,5 @@
+#ifndef QSIEVE_H
+#define QSIEVE_H
 #include <stdio.h>
 #include <string.h>
 #include <gmp.h>
@@ -21,4 +23,4 @@
 // defs
 typedef long long ll;
 
-
+#endif
