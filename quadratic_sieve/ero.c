@@ -43,7 +43,7 @@ int* ero(int requested) {
 			long long next_number = PRIMES[i]*((SIEVE_SIZE*it-1)/PRIMES[i]+1);
 			if (next_number < PRIMES[i]*1LL*PRIMES[i]) next_number=PRIMES[i]*1LL*PRIMES[i]; // i*i if bueno?
 		//	printf("%d NEXT IS %lld\n",PRIMES[i],next_number);
-			for (;next_number<SIEVE_SIZE*(it+1);next_number+=PRIMES[i]) {
+			for (;next_number<SIEVE_SIZE*(it+1)*2;next_number+=PRIMES[i]) {
 				SIF[next_number-SIEVE_SIZE*(it)]=1;
 			}
 
@@ -66,6 +66,6 @@ int* ero(int requested) {
 	
 }
 int main() {
-	int * k = ero(69000000);
-	for (int i=0;i<690;i++) printf("%d ", k[i]);
+	int * k = ero(6900);
+	for (int i=0;i<69;i++) printf("%d ", k[i]);
 }

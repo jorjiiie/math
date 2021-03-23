@@ -7,20 +7,28 @@
 
 #ifndef POLLARD_RHO
 
-#include "pollard_rho.c"
+#include "pollardrho.c"
 #define POLLARD_RHO
 
 #endif
 
 #ifndef LINEAR_SOLVE
 
-#include "linalg.c"
+//#include "linalg.c"
 #define LINEAR_SOLVE
 
 #endif
 
+#ifndef VECTOR_32
+#define VECTOR_32
+#include "vector.c"
+#endif
 
+
+#ifndef LONG_LONG_AS_LL
 // defs
+#define LONG_LONG_AS_LL
 typedef long long ll;
+#endif
 
 #endif
