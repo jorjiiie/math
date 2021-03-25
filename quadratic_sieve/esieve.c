@@ -20,13 +20,12 @@ int* ero(int requested,mpz_t n) {
 	// for now its horrible speed and whatnot but whatever! it works
 
 	vector_32 primes;
-	int * VALID_PRIMES = calloc (requested,sizeof(int));
-
-	if (requested==0) return VALID_PRIMES;
-	VALID_PRIMES[0]=2;
-	if (requested==1) return VALID_PRIMES; // everything is quadratic residue (mod 2)
 
 	requested++;
+	
+	int * VALID_PRIMES = calloc (requested,sizeof(int));
+	VALID_PRIMES[0]=2;
+
 	mpz_init(N_FOR_SIEVE_SO_I_DONT_HAVE_TO_COPY_EVERY_TIME);
 	mpz_init(LOL_LOL_LOL);
 	mpz_init(XABC);
@@ -34,7 +33,7 @@ int* ero(int requested,mpz_t n) {
 
 	int prime_loc=1;
 	vector_init(&primes);	
-	int SIEVE_SIZE=100;
+	int SIEVE_SIZE=10000;
 	int * SIF = malloc (sizeof(int) * SIEVE_SIZE);
 	
 	// first loop of sieve on its own probably
@@ -101,6 +100,9 @@ int* ero(int requested,mpz_t n) {
 	end:
 		vector_free(&primes);
 		free(SIF);
+		mpz_clear(LOL_LOL_LOL);
+		mpz_clear(N_FOR_SIEVE_SO_I_DONT_HAVE_TO_COPY_EVERY_TIME);
+		mpz_clear(XABC);
 		return VALID_PRIMES;
 	
 }
@@ -111,7 +113,7 @@ int main() {
 	mpz_init(jo);
 	mpz_set_si(jo,71);
 	clock_t t = clock();
-	int * k = ero(69,jo);
+	int * k = ero(6900,jo);
 	clock_t j = clock();
 	printf("time taken %lf seconds\n",(double)(j-t)*1.0/CLOCKS_PER_SEC);
 	for (int i=0;i<69;i++) printf("%d ", k[i]);
@@ -119,6 +121,7 @@ int main() {
 	int lol =  69;
 	printf("%d nth prime is something %d\n",lol,k[lol]);
 	mpz_clear(jo);
+	free(k);
 
 }
 
