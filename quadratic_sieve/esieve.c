@@ -2,8 +2,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-#include "qsieve.h"
+#include <gmp.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 mpz_t N_FOR_SIEVE_SO_I_DONT_HAVE_TO_COPY_EVERY_TIME;
 mpz_t LOL_LOL_LOL,XABC;
 int check(long long j) {
@@ -124,4 +127,7 @@ int main() {
 	free(k);
 
 }
+#ifdef __cplusplus
+}
+#endif
 

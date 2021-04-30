@@ -1,3 +1,4 @@
+#pragma once
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -13,6 +14,11 @@ void vector_init(vector_32 * vec) {
 	(vec->nums) = (int* )malloc(sizeof(int) * 2);
 	vec->size = 1;
 	vec->back = 0;
+}
+void vector_init(vector_32 * vec, int sz)
+{
+	while (vec->size < sz) resize(vec);
+	vec->back=0;
 }
 void resize(vector_32 * vec) {
 	// double current capacity
@@ -47,6 +53,11 @@ int space(vector_32 * vec) {
 void print(vector_32 * vec) {
 	for (int i=0;i<vec->back;i++) printf("%d ",vec->nums[i]);
 }
+int* v32_get(vector_32 * vec, int p)
+{
+	return &(vec->nums[p]);
+}
+
 /*
 int main() {
 	vector_32 joe;
