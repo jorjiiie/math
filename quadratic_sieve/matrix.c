@@ -8,36 +8,43 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 typedef struct matrix
 {
 	// will i deal with this cancer yes apparently so
-	int * a;
+	uint32_t ** a;
 	int rows, cols;
 
 } matrix;
-
+// i'll leave it as r,c but 
 void m_init(matrix* mat, int r, int c)
 {
-	(mat->a) = (int*)  malloc(r * c * sizeof *mat->a);
+	(mat->a) = (uint32_t**)  malloc(r * sizeof *mat->a);
+	if (mat->a)
+	{
+		for (int i = 0; i < r; i++)
+		{
+			mat->a[i] = malloc(sizeof(mat->a[i]) * c);
+		}
+	}
 	mat->rows = r;
 	mat->cols = c;
 }
 
-int* m_get(matrix* mat, int i, int j)
+uint32_t* m_get(matrix* mat, int i, int j)
 {
-	return &(mat->a[i*mat->cols+j]);
+	return &(mat->a[i][j]);
 }
 void m_set(matrix* mat, int i, int j, int v)
 {
-	mat->a[i*mat->cols+j]=v;
+	mat->a[i][j]=v;
 }
 void m_ch(matrix* mat, int i, int bitNum)
 {
-	int shift = 32;
 	// ith row, and the int is bitNum/32 
-	int* num = m_get(mat, i, bitNum>>5); 
+	uint32_t* num = m_get(mat, i, bitNum>>5); 
 	// uhh idk if this is the best but whatever!!
-	(*num)^(1<<(bitNum&7));
+	(*num)^=((uint32_t) 1<<(31-bitNum&31));
 
 	return;
 }
@@ -51,12 +58,24 @@ void m_print(matrix* mat)
 		{
 			printf("%d, ",*(m_get(mat,i,j)));
 		}
-		printf("X]\n");
+		printf("X]");
+		if (i+1<mat->rows) printf("\n");
+		else printf(" ]\n");
 	}
 }
+// we need a copy here so we don't screw up the original matrix, if the first solve doesn't work, (then permute)
+int gauss(matrix* mat, int* sol)
+{
+	
+}
+
 int main()
 {
-	matrix* joe;
-	m_init(joe,5,5);
-	m_print(joe);
+	matrix joe;
+	m_init(&joe,5,5);
+	m_print(&joe);
+//	m_set(&joe,1,1,64);
+//	*m_get(&joe,0,0)=5;
+	m_ch(&joe,0,0);
+	m_print(&joe);
 }	

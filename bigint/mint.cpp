@@ -136,7 +136,7 @@ mint& mint::operator+=(const long long k) {
 }
 mint mint::operator*(const long long k) {
 	mint c = *this;
-	c-=k;
+	c*=k;
 	return c;
 }
 mint& mint::operator*=(const long long k) {
