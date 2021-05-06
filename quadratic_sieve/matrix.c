@@ -66,7 +66,7 @@ void m_print(matrix* mat)
 // we need a copy here so we don't screw up the original matrix, if the first solve doesn't work, (then permute)
 int gauss(matrix* mat, int* sol)
 {
-	
+	return 1;
 }
 
 int main()

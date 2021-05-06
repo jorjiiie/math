@@ -1,3 +1,6 @@
+#pragma once
+// im insane combining pragma once and header guards LOL
+// mostly the reason is bc i didn't know how to use pragma once HAHAHAHAHAH
 #ifndef QSIEVE_H
 #define QSIEVE_H
 #include <stdio.h>
@@ -5,12 +8,9 @@
 #include <gmp.h>
 #include <time.h>
 
-#ifndef POLLARD_RHO
 
-#include "pollardrho.c"
-#define POLLARD_RHO
+#include "prho.c"
 
-#endif
 
 #ifndef LINEAR_SOLVE
 
