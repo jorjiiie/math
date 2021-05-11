@@ -9,15 +9,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+// GOD i could do c++ and just do template <class T> and T ** a
+// crying
+// we could do primes -> or number ->
+// primes -> would fit the use of relation but number -> would be easier for converting
+// but i think primes -> is better since we have to filter anyways
 typedef struct matrix
 {
 	// will i deal with this cancer yes apparently so
 	uint32_t ** a;
 	int rows, cols;
 
-} matrix;
+} matrix_32;
+
 // i'll leave it as r,c but 
-void m_init(matrix* mat, int r, int c)
+void m_init(matrix_32* mat, int r, int c)
 {
 	(mat->a) = (uint32_t**)  malloc(r * sizeof *mat->a);
 	if (mat->a)
@@ -31,15 +37,15 @@ void m_init(matrix* mat, int r, int c)
 	mat->cols = c;
 }
 
-uint32_t* m_get(matrix* mat, int i, int j)
+uint32_t* m_get(matrix_32* mat, int i, int j)
 {
 	return &(mat->a[i][j]);
 }
-void m_set(matrix* mat, int i, int j, int v)
+void m_set(matrix_32* mat, int i, int j, int v)
 {
 	mat->a[i][j]=v;
 }
-void m_ch(matrix* mat, int i, int bitNum)
+void m_ch(matrix_32* mat, int i, int bitNum)
 {
 	// ith row, and the int is bitNum/32 
 	uint32_t* num = m_get(mat, i, bitNum>>5); 
@@ -48,7 +54,7 @@ void m_ch(matrix* mat, int i, int bitNum)
 
 	return;
 }
-void m_print(matrix* mat)
+void m_print(matrix_32* mat)
 {
 	printf("[ ");
 	for (int i=0;i<mat->rows;i++)
@@ -64,14 +70,16 @@ void m_print(matrix* mat)
 	}
 }
 // we need a copy here so we don't screw up the original matrix, if the first solve doesn't work, (then permute)
-int gauss(matrix* mat, int* sol)
+int gauss(matrix_32* mat, int* sol)
 {
 	return 1;
 }
 
+
+
 int main()
 {
-	matrix joe;
+	matrix_32 joe;
 	m_init(&joe,5,5);
 	m_print(&joe);
 //	m_set(&joe,1,1,64);
