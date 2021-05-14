@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <gmp.h>
-
+#include "vector.c"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -71,12 +71,12 @@ int* ero(int requested,mpz_t n) {
 		for (i=0;i<primes.back;i++) {
 			// sieve out current primes;
 			// next num in sieve size is 2*i*((SIEVE_SIZE*it-1)/i+1);
-			ll p = primes.nums[i];
+			long long p = primes.nums[i];
 			if (p*p>SIEVE_SIZE*(it+1)*2||p*p<0) break; // done for this segment since sorted! also if its way too big
 			long long next_number = p*((2*SIEVE_SIZE*it-1)/p+1);
 			if ((next_number&1)==0) next_number+=p;
 			if (next_number < p*p) next_number=p*p; // i*i if bueno?
-			printf("next num is %lld %lld\n",next_number, p);
+			// printf("next num is %lld %lld\n",next_number, p);
 			for (;next_number<SIEVE_SIZE*2*(it+1);next_number+=p*2) {
 				SIF[(next_number-SIEVE_SIZE*2*(it))/2]=1;
 			}
@@ -116,7 +116,7 @@ int main() {
 	mpz_init(jo);
 	mpz_set_si(jo,71);
 	clock_t t = clock();
-	int * k = ero(6900,jo);
+	int * k = ero(50000000,jo);
 	clock_t j = clock();
 	printf("time taken %lf seconds\n",(double)(j-t)*1.0/CLOCKS_PER_SEC);
 	for (int i=0;i<69;i++) printf("%d ", k[i]);

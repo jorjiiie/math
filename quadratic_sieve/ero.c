@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <time.h>
 int* ero(int requested) {
 
 	// for now its horrible speed and whatnot but whatever! it works
@@ -10,7 +10,9 @@ int* ero(int requested) {
 	PRIMES[0]=2;
 	int prime_loc = 1;
 	if (requested==1) return PRIMES; // everything is quadratic residue (mod 2)
-	int SIEVE_SIZE=10000000;
+	// should make more efficient with bit array instead of int - will be 32x less memory and prob a good bit faster? (idk about that part actually but defo much less memory)
+	// can prob just use relation LMAOOAOAOOO
+	int SIEVE_SIZE=100000;
 	int * SIF = malloc (sizeof(int) * SIEVE_SIZE);
 	// first loop of sieve on its own probably
 	memset(SIF,0,SIEVE_SIZE*sizeof(int));
@@ -61,11 +63,14 @@ int* ero(int requested) {
 			
 		}
 		it++;
-		printf("%d %d\n",it,prime_loc);
+		// printf("%d %d %d\n",it,prime_loc, SIEVE_SIZE*it);
 	}
+	return PRIMES;
 	
 }
 int main() {
-	int * k = ero(6900);
+	clock_t t = clock();
+	int * k = ero(1e7);
+	printf("primes done in %f seconds\n",(double)(clock()-t)/CLOCKS_PER_SEC);
 	for (int i=0;i<69;i++) printf("%d ", k[i]);
 }

@@ -15,11 +15,6 @@ void vector_init(vector_32 * vec) {
 	vec->size = 1;
 	vec->back = 0;
 }
-void vector_init(vector_32 * vec, int sz)
-{
-	while (vec->size < sz) resize(vec);
-	vec->back=0;
-}
 void resize(vector_32 * vec) {
 	// double current capacity
 	int sz = (vec)->size;
@@ -31,6 +26,12 @@ void resize(vector_32 * vec) {
 	(vec)->size<<=1;
 	(vec)->nums=n;
 }
+void vector_init_c(vector_32 * vec, int sz)
+{
+	while (vec->size < sz) resize(vec);
+	vec->back=0;
+}
+
 
 void vector_push_back(vector_32 * vec, int n) {
 	vec->nums[vec->back++]=n;
