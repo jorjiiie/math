@@ -47,7 +47,7 @@ class mint {
 		mint& operator%=(const long long);
 
 		// since division calculates both, we may as well have it like this
-		mint helper(const mint&, bool);
+		void helper(const mint&, mint&, mint&);
 
 		// for obvious reasons I'm not supporting this with anything beyond int
 		mint operator>>(const int);

@@ -1,5 +1,6 @@
 #include "mint.h"
 
+
 mint::mint() {
 	num.clear();
 	sign = false;
@@ -21,9 +22,10 @@ mint::mint(long long n) {
 		n=-n;
 	}
 	num.clear();
-	
-	num.push_back(n&0x7FFFFFFF);
+
 	if (n>>31) num.push_back(n>>31);
+	num.push_back(n&0x7FFFFFFF);
+	
 	// shouldn't have anything else after that
 }
 mint::mint(const char* c) {
@@ -61,6 +63,44 @@ mint& mint::operator+=(const mint& k) {
 		this->num[i]=nxt&0x7FFFFFFF;
 	}
 	if (carry) this->num.push_back(carry); // this should be ok!
+	return *this;
+}
+mint mint::operator-(const mint& k) {
+	mint c = *this;
+	c-=k;
+	return c;
+}
+mint& mint::operator-=(const mint& k) {
+	// this is so annoying
+	// essentially if opposite signs, then add them and adjust the sign accordingly
+	// else, subtract the small one from the big one and make it negative
+
+	if (k.sign ^ this->sign) {
+		*this += k;
+		return *this;
+	}
+	mint tmp1 = *this;
+	mint tmp2 = k;
+	tmp1.sign = false;
+	tmp2.sign = false;
+	if (tmp1 < tmp2) 
+		swap(tmp1,tmp2);
+	// tmp1 is the bigger one
+	// now essentially same as addition
+	tmp1.clean();
+	tmp2.clean();
+	int n = tmp1.num.size();
+	int carry = 0;
+	for (int i=0;i<n;i++) {
+		if (tmp1[i]+carry < tmp2[i]) {
+			carry = -1;
+			tmp[i] -= (tmp2[i] - 2147483648LL);
+		} else {
+			if (carry) 
+				tmp[i]+=carry;
+			tmp1[i]-=tmp2[i];
+		}
+	}
 	return *this;
 }
 mint mint::operator*(const mint& k) {
@@ -110,7 +150,7 @@ mint mint::operator/(const mint& k) {
 	return c;
 }
 mint& mint::operator/=(const mint& k) {
-	*this = (*this).helper(k, false);
+
 	return *this;
 }
 mint mint::operator%(const mint& k) {
@@ -118,8 +158,8 @@ mint mint::operator%(const mint& k) {
 	c%=k;
 	return c;
 }
-mint mint::operator%=(const mint& k) {
-	*this = (*this).helper(k,true);
+mint& mint::operator%=(const mint& k) {
+
 	return *this;
 }
 mint mint::operator+(const long long k) {
@@ -143,38 +183,62 @@ mint& mint::operator*=(const long long k) {
 	// do smth
 	return *this;
 }
-mint mint::helper(const mint& quotient, bool remainder) {
+void mint::helper(const mint& divisor, mint& quotient, mint& remainder) {
 	mint z = 0LL;
 	mint x = *this;
+	mint d = divisor;
 	bool eq = x==z; // why do I have to do this cuz otherwise it says it'll get changed which is true but wtf
 	assert(!eq && "DIVISION BY ZERO");
 
-	// if |x| < |k| then obviously its zero
-	if (x<k) {
-		this->num.clear();
-		this->sign=false;
-		return *this;
+	mint current = 0LL;
+
+	// if |x| < |divisor| then quotient = 0, remainder = x
+	bool sign = (x.sign ^ d.sign);
+	x.sign = false;
+	d.sign = false;
+	if (x<d) {
+		
+
+		quotient = 0LL;
+		remainder = x;
+		if (sign)
+			remainder-=d;
+		return;
 	}
-	mint divisor = k;
-	divisor.clean();
-	(*this).clean();
+	d.clean();
+	x.clean();
 	// Im not going to follow wikipedia for the rest of this so 
 	// I'll just think ab it and implement a really bad long division
-	mint current = 0LL;
-	mint quotient = 0LL;
-	for (int i=this->num.size()-1;i>=k.num.size();i--) {
+	for (int i= x.num.size()-1;i>=0;i--) {
 		// uwu
 		current.shiftx(1);
-		current+=k;
-		if (current<k) {
-			// add 0 to the quotient?
+		current += x.num[i];
+
+		if (current < d) {
 			quotient.shiftx(1);
+			continue;
 		}
-		// else we try to figure out the quotient part up top;
-		
+
+		// binary search it out uwu
+		long long right = base;
+		long long left = 1;
+		long long fac = -1;
+		while (left <= right) {
+			long long mid = (right+left)/2;
+			if (d*mid > current) {
+				// bad
+				right = mid-1;
+			} else {
+				left = mid+1;
+				fac = mid;
+			}
+		}
+		assert (fac!=-1 && "wtf is goign on");
+		quotient.shiftx(1);
+		quotient += fac;
 	}
-	if (helper) return current;
-	return quotient;
+	remainder = current;
+	return;
 	/*
 	if (*this<k) { 
 		// if its smaller then its zero
@@ -269,13 +333,14 @@ void mint::shiftx(int x) {
 		(*this).lshiftx(-x);
 		return;
 	}
+	// add zeros at the front
 	for (int i=0;i<x;i++)
 		this->num.push_back(0);
 	std::rotate(this->num.rbegin(), this->num.rbegin() + x, this->num.rend());
 }
 void mint::lshiftx(int x) {
 	std::rotate(this->num.begin(),this->num.begin()+x, this->num.end());
-	while (x--&&!this->num.empty()) {
+	while ((x--)&&!this->num.empty()) {
 		this->num.pop_back();
 	}
 }

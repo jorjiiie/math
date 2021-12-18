@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+
+long sum = 0;
 int* ero(int requested) {
 
 	// for now its horrible speed and whatnot but whatever! it works
@@ -72,5 +74,11 @@ int main() {
 	clock_t t = clock();
 	int * k = ero(1e7);
 	printf("primes done in %f seconds\n",(double)(clock()-t)/CLOCKS_PER_SEC);
-	for (int i=0;i<69;i++) printf("%d ", k[i]);
+	for (int i=1;i<69;i++) printf("%d ", k[i]);
+	for (int i=1;i<1e7;i++) {
+		if (k[i] < 2e7) {
+			sum +=k[i];
+		} else break;
+	}
+	printf("%ld", sum);
 }
