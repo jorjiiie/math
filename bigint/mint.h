@@ -15,7 +15,7 @@
 class mint {
 	private:
 		std::vector<unsigned int> num;
-		bool sign;
+		bool sign = false;
 		static const unsigned int base = 2147483648;
 	public:
 		mint();
@@ -76,6 +76,7 @@ class mint {
 		void shiftx(int);
 		void lshiftx(int);
 
+		std::string baseten();
 		friend std::ostream& operator<< (std::ostream&, const mint&);
 };
 

@@ -1,6 +1,8 @@
 #include "mint.h"
 
 
+#define lc() std::cout << "@: " << __LINE__ << "\n", std::fflush(stdout); 
+
 mint::mint() {
 	num.clear();
 	sign = false;
@@ -74,7 +76,7 @@ mint& mint::operator-=(const mint& k) {
 	// this is so annoying
 	// essentially if opposite signs, then add them and adjust the sign accordingly
 	// else, subtract the small one from the big one and make it negative
-
+	lc()
 	if (k.sign ^ this->sign) {
 		*this += k;
 		return *this;
@@ -83,24 +85,33 @@ mint& mint::operator-=(const mint& k) {
 	mint tmp2 = k;
 	tmp1.sign = false;
 	tmp2.sign = false;
-	if (tmp1 < tmp2) 
-		swap(tmp1,tmp2);
+	if (tmp1 < tmp2) {
+		std::swap(tmp1,tmp2);
+		this->sign ^=1;
+	}
 	// tmp1 is the bigger one
 	// now essentially same as addition
 	tmp1.clean();
 	tmp2.clean();
 	int n = tmp1.num.size();
+	for (int i=(n-tmp2.num.size());i;i--) {
+		tmp2.num.push_back(0);
+	}
+	lc()
+	std::cout << "tmp1: " << tmp1 << "\n" << "tmp2: " << tmp2 << "\n";
+	fflush(stdout);
 	int carry = 0;
 	for (int i=0;i<n;i++) {
-		if (tmp1[i]+carry < tmp2[i]) {
+		if (tmp1.num[i]+carry < tmp2.num[i]) {
 			carry = -1;
-			tmp[i] -= (tmp2[i] - 2147483648LL);
+			tmp1.num[i] -= (tmp2.num[i] - 2147483648LL);
 		} else {
 			if (carry) 
-				tmp[i]+=carry;
-			tmp1[i]-=tmp2[i];
+				tmp1.num[i]+=carry;
+			tmp1.num[i]-=tmp2.num[i];
 		}
 	}
+	this->num = tmp1.num;
 	return *this;
 }
 mint mint::operator*(const mint& k) {
@@ -150,7 +161,9 @@ mint mint::operator/(const mint& k) {
 	return c;
 }
 mint& mint::operator/=(const mint& k) {
-
+	mint q,r;
+	(*this).helper(k,q,r);
+	*this = q;
 	return *this;
 }
 mint mint::operator%(const mint& k) {
@@ -159,7 +172,9 @@ mint mint::operator%(const mint& k) {
 	return c;
 }
 mint& mint::operator%=(const mint& k) {
-
+	mint q,r;
+	(*this).helper(k,q,r);
+	*this=r;
 	return *this;
 }
 mint mint::operator+(const long long k) {
@@ -171,7 +186,7 @@ mint& mint::operator+=(const long long k) {
 	// do smth
 	// LOL LAZY SOLUTION:
 	mint tmp = k;
-	*this+=k;
+	*this+=tmp;
 	return *this;
 }
 mint mint::operator*(const long long k) {
@@ -181,15 +196,21 @@ mint mint::operator*(const long long k) {
 }
 mint& mint::operator*=(const long long k) {
 	// do smth
-	return *this;
+	mint aa = k;
+	return *this*=aa;
 }
 void mint::helper(const mint& divisor, mint& quotient, mint& remainder) {
 	mint z = 0LL;
 	mint x = *this;
 	mint d = divisor;
-	bool eq = x==z; // why do I have to do this cuz otherwise it says it'll get changed which is true but wtf
+	bool eq = d==z; // why do I have to do this cuz otherwise it says it'll get changed which is true but wtf
 	assert(!eq && "DIVISION BY ZERO");
 
+	if (x==z) {
+		quotient = 0LL;
+		remainder = 0LL;
+		return;
+	}
 	mint current = 0LL;
 
 	// if |x| < |divisor| then quotient = 0, remainder = x
@@ -207,35 +228,45 @@ void mint::helper(const mint& divisor, mint& quotient, mint& remainder) {
 	}
 	d.clean();
 	x.clean();
-	// Im not going to follow wikipedia for the rest of this so 
-	// I'll just think ab it and implement a really bad long division
+	
 	for (int i= x.num.size()-1;i>=0;i--) {
 		// uwu
 		current.shiftx(1);
-		current += x.num[i];
+
+
+		current += (x.num[i]);
 
 		if (current < d) {
 			quotient.shiftx(1);
 			continue;
 		}
-
+		lc()
 		// binary search it out uwu
-		long long right = base;
+		long long right = 2147483648LL;
 		long long left = 1;
 		long long fac = -1;
+		lc()
 		while (left <= right) {
 			long long mid = (right+left)/2;
+			std::cout << mid << " " << (d*mid) << " c:" << current << "\n";
 			if (d*mid > current) {
 				// bad
+
 				right = mid-1;
 			} else {
 				left = mid+1;
 				fac = mid;
 			}
 		}
+		std::cout << "current is : " << current << " d*fac: " << (d*fac) << "\n";
+		current -= (d*fac);
+				std::cout << "current is : " << current << "\n";
+
 		assert (fac!=-1 && "wtf is goign on");
 		quotient.shiftx(1);
 		quotient += fac;
+		lc()
+		std::cout << quotient << " " << current << " " << fac << "\n";
 	}
 	remainder = current;
 	return;
@@ -344,6 +375,23 @@ void mint::lshiftx(int x) {
 		this->num.pop_back();
 	}
 }
+std::string mint::baseten() {
+	std::string uwu = "";
+	mint zero = 0LL;
+	mint tmp = *this;
+	mint q,r;
+	mint ten = 10;
+	while (tmp > zero) {
+		 tmp.helper(ten,q,r);
+		 tmp = q;
+		 uwu += std::to_string(r.num[0]);
+		 q = r = zero;
+
+	}
+	std::reverse(uwu.rbegin(),uwu.rend());
+	return uwu;
+
+}
 std::ostream& operator<<(std::ostream& stream, const mint& k) {
 	// temporary lol
 	for (unsigned int i : k.num) {
@@ -352,16 +400,28 @@ std::ostream& operator<<(std::ostream& stream, const mint& k) {
 	return stream;
 }
 int main() {
+	lc()
+
 	std::cout<<"HASDH\n";
 	mint a = (1<<30);
 	std::cout << a << "\n" << a[1] << "\n";
 	mint b = (1<<30);
 	mint c = a*b;
-	mint d = 16;
+	mint k = 69;
+	mint d = 58488;
+	mint t = 10;
 	c*=d;
-	std::cout << c << "\n";
+	std::cout << c.baseten() << "\n";
+	// std::cout << k*d << "\n";
+	// std::cout << a%d << "\n";
+	/*
+	mint ajaj = c/t;
+	mint abab = c%t;
+	std::cout << "C: " << c << "\n";
+	std::cout << "IMPORTANT: " << ajaj  << " + " << abab<< "\n";
 	c.shiftx(1);
 	std::cout << c << "\n";
 	c.shiftx(-2);
 	std::cout << c << "\n";
+	*/
 }
