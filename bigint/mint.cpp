@@ -1,7 +1,7 @@
 #include "mint.h"
 
 
-#define lc() std::cout << "@: " << __LINE__ << "\n", std::fflush(stdout); 
+#define lc() std::cerr << "@: " << __LINE__ << "\n", std::fflush(stderr); 
 
 mint::mint() {
 	num.clear();
@@ -9,13 +9,15 @@ mint::mint() {
 }
 mint::mint(std::string s) {
 	num.clear();
-	mint n;
-	// go from lsd to msd
-	std::reverse(s.begin(),s.end());
+	mint n = 0LL;
 	for (char c : s) {
 		n*=10;
-		n+=(int)(c-'0');
+		n+=(long long)(c-'0');
+		std::cout << n << " " << c << " " << (c-'0') << " \n";
 	}
+
+	*this = n;
+	std::cout << (*this) << " " << n << "\n";
 }
 mint::mint(long long n) {
 	// this can be like pretty big
@@ -24,12 +26,13 @@ mint::mint(long long n) {
 		n=-n;
 	}
 	num.clear();
+	num.push_back(n&0x7FFFFFFF);
 
 	if (n>>31) num.push_back(n>>31);
-	num.push_back(n&0x7FFFFFFF);
-	
+
 	// shouldn't have anything else after that
 }
+
 mint::mint(const char* c) {
 	mint(std::string(c));
 }
@@ -76,7 +79,6 @@ mint& mint::operator-=(const mint& k) {
 	// this is so annoying
 	// essentially if opposite signs, then add them and adjust the sign accordingly
 	// else, subtract the small one from the big one and make it negative
-	lc()
 	if (k.sign ^ this->sign) {
 		*this += k;
 		return *this;
@@ -97,9 +99,6 @@ mint& mint::operator-=(const mint& k) {
 	for (int i=(n-tmp2.num.size());i;i--) {
 		tmp2.num.push_back(0);
 	}
-	lc()
-	std::cout << "tmp1: " << tmp1 << "\n" << "tmp2: " << tmp2 << "\n";
-	fflush(stdout);
 	int carry = 0;
 	for (int i=0;i<n;i++) {
 		if (tmp1.num[i]+carry < tmp2.num[i]) {
@@ -119,41 +118,22 @@ mint mint::operator*(const mint& k) {
 	c*=k;
 	return c;
 }
-mint& mint::operator*=(const mint& k) {
-	// for now we will impl a slow multiplication
-	std::vector<std::pair<unsigned long long, unsigned long long> > tmp; // we have two so we can handle overflow better
-	// it's essentially a two-leg 128 bit number
 
-	// tmp.push_back(0);
+mint& mint::operator*=(const mint& k) {
+	// joe inefficient
+	mint joe = 0LL;
 	for (int i=0;i<this->num.size();i++) {
 		for (int j=0;j<k.num.size();j++) {
-			while (tmp.size()<1+i+j) {
-				// make the size right
-				tmp.push_back({0,0}); 
-			}
-			tmp[i+j].fi+=(unsigned long long)this->num[i]*k.num[j];
-			tmp[i+j].se+=(tmp[i+j].fi)>>31;
-			tmp[i+j].fi&=0x7FFFFFFF;
+			long long prod = (long long)(this->num[i])* 1LL * (long long)k.num[j];
+			mint tmp = prod;
+			tmp.shiftx(i+j);
+			joe += tmp;
 		}
 	}
-	// then do addition
-
-	unsigned long long carry=0; 
-	int current = 0;
-	// realistically carry can be like really big so can't use int 
-	for (int i=0;i<tmp.size();i++) {
-		tmp[i].fi+=carry;
-		carry = tmp[i].fi>>31;
-		carry+=tmp[i].se;
-		this->num[i]=(unsigned int) (tmp[i].fi&0x7FFFFFFF);
-	}
-	while (carry) {
-		num.push_back(carry&0x7FFFFFFF);
-		carry>>=31;
-	}
-	// always positive if they are the same sign and negative otherwise
-	this->sign^=k.sign; 
+	this->sign ^= k.sign;
+	*this = joe;
 	return *this;
+
 }
 mint mint::operator/(const mint& k) {
 	mint c = *this;
@@ -240,15 +220,12 @@ void mint::helper(const mint& divisor, mint& quotient, mint& remainder) {
 			quotient.shiftx(1);
 			continue;
 		}
-		lc()
 		// binary search it out uwu
 		long long right = 2147483648LL;
 		long long left = 1;
 		long long fac = -1;
-		lc()
 		while (left <= right) {
 			long long mid = (right+left)/2;
-			std::cout << mid << " " << (d*mid) << " c:" << current << "\n";
 			if (d*mid > current) {
 				// bad
 
@@ -258,38 +235,14 @@ void mint::helper(const mint& divisor, mint& quotient, mint& remainder) {
 				fac = mid;
 			}
 		}
-		std::cout << "current is : " << current << " d*fac: " << (d*fac) << "\n";
 		current -= (d*fac);
-				std::cout << "current is : " << current << "\n";
-
 		assert (fac!=-1 && "wtf is goign on");
 		quotient.shiftx(1);
 		quotient += fac;
-		lc()
-		std::cout << quotient << " " << current << " " << fac << "\n";
 	}
 	remainder = current;
 	return;
-	/*
-	if (*this<k) { 
-		// if its smaller then its zero
-		this->num.clear();
-		this->sign=false;
-		return *this;
-	}
-	// algorithm is ripped off wikipedia
-	mint c = k;
-	c.clean();
-	// this is already clean
-	int n = this->num.size();
-	int m = c.num.size();
-	mint q=0,r;
-	long long d;
-	// initialize d (current) to first m-1 digits of n
-	for (int i=0;i<m-1;i++) {
-		r.num.push_back(this->.num[i]);
-	}
-	*/
+
 }
 mint mint::operator>>(const int k) {
 	// right shift k bits
@@ -382,10 +335,10 @@ std::string mint::baseten() {
 	mint q,r;
 	mint ten = 10;
 	while (tmp > zero) {
-		 tmp.helper(ten,q,r);
-		 tmp = q;
-		 uwu += std::to_string(r.num[0]);
-		 q = r = zero;
+		tmp.helper(ten,q,r);
+		tmp = q;
+		uwu += std::to_string(r.num[0]);
+		q = r = zero;
 
 	}
 	std::reverse(uwu.rbegin(),uwu.rend());
@@ -399,29 +352,24 @@ std::ostream& operator<<(std::ostream& stream, const mint& k) {
 	}
 	return stream;
 }
-int main() {
-	lc()
 
-	std::cout<<"HASDH\n";
-	mint a = (1<<30);
-	std::cout << a << "\n" << a[1] << "\n";
-	mint b = (1<<30);
-	mint c = a*b;
-	mint k = 69;
-	mint d = 58488;
-	mint t = 10;
-	c*=d;
-	std::cout << c.baseten() << "\n";
-	// std::cout << k*d << "\n";
-	// std::cout << a%d << "\n";
-	/*
-	mint ajaj = c/t;
-	mint abab = c%t;
-	std::cout << "C: " << c << "\n";
-	std::cout << "IMPORTANT: " << ajaj  << " + " << abab<< "\n";
-	c.shiftx(1);
-	std::cout << c << "\n";
-	c.shiftx(-2);
-	std::cout << c << "\n";
-	*/
+void mint::set_str(const std::string& s) {
+	num.clear();
+	mint n = 0LL;
+	for (char c : s) {
+		n*=10;
+		n+=(long long)(c-'0');
+	}
+
+	*this = n;
+}
+int main() {
+	mint joe;
+	joe.set_str("69420128397128937819272389473924723984");
+	mint pork;
+	pork.set_str("172812763816736182393179282748397824723947239482343");
+	mint k = joe*pork;
+	std::cout << "AJSKDLJAKLSD: " << joe*10LL << "\n";
+	// return 0;
+	std::cout << "num: " << k.baseten() << "\n";
 }

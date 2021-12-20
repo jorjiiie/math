@@ -71,6 +71,7 @@ class mint {
 		void changeBit(int, bool);
 		void clean();
 
+		void set_str(const std::string&);
 		mint slow_mult(const mint&);
 
 		void shiftx(int);
