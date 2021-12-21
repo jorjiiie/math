@@ -26,7 +26,8 @@
 	while(1) { 
 		int cnt = 1;
 		mpz_set_si(k,2);
-		mpz_urandomm(x,state,n);
+		// mpz_urandomm(x,state,n);
+		mpz_set_si(x,69);
 		mpz_set(y,x);	
 		while (1) {
 			// Pollard Rho
@@ -49,6 +50,7 @@
 				mpz_set(y,x);
 				mpz_add(k,k,k);
 			}
+			printf("%d\n", cnt);
 		}
 		c++;
 		// if we y==x then we break the loop and try again with a different value of c
@@ -114,8 +116,12 @@ int main() {
 	mpz_set_str(a,"399899999999999",10);
 	mpz_set_str(b,"493935332521159",10);
 	//mpz_mul(test,a,b);
+	clock_t start = clock();
 	mpz_init_set_str(test,"19326223710861634601",10);
 	int cnt = 0;
 	rhofactor(test,arr,&cnt);
+	clock_t end = clock();
 	printf("num has %d factors\n",cnt);
+	gmp_printf("%Zd %Zd\n",arr[0], arr[1]);
+	printf("took %lf seconds", (double) (end-start)/CLOCKS_PER_SEC);
 }

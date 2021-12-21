@@ -7,6 +7,7 @@ mint::mint() {
 	num.clear();
 	sign = false;
 }
+
 mint::mint(std::string s) {
 	num.clear();
 	mint n = 0LL;
@@ -367,6 +368,7 @@ void mint::set_str(const std::string& s) {
 
 	*this = n;
 }
+/*
 int main() {
 	mint abc = 1;
 	mint akd = 1;
@@ -385,3 +387,4 @@ int main() {
 	// return 0;
 	std::cout << "num: " << k.baseten() << "\n";
 }
+*/
