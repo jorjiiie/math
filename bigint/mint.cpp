@@ -61,7 +61,7 @@ mint& mint::operator+=(const mint& k) {
 	int carry = 0;
 	for (int i=0;i<n;i++) {
 		// long is enuf
-		unsigned int nxt = this->num[i]+tmp.num[i]+carry; 
+		long long nxt = this->num[i]+tmp.num[i]+carry; 
 		// max nxt can be is 4294967294
 		carry=nxt>>31;
 		// then we need to clear the 32nd bit always
@@ -101,12 +101,16 @@ mint& mint::operator-=(const mint& k) {
 	}
 	int carry = 0;
 	for (int i=0;i<n;i++) {
-		if (tmp1.num[i]+carry < tmp2.num[i]) {
+		if (tmp1.num[i]*1LL+carry < tmp2.num[i]) {
+			tmp1.num[i] += 2147483648LL;
+			tmp1.num[i] -= tmp2.num[i];
+			if (carry)
+				tmp1.num[i] += carry;
 			carry = -1;
-			tmp1.num[i] -= (tmp2.num[i] - 2147483648LL);
 		} else {
 			if (carry) 
 				tmp1.num[i]+=carry;
+			carry = 0;
 			tmp1.num[i]-=tmp2.num[i];
 		}
 	}
@@ -364,7 +368,15 @@ void mint::set_str(const std::string& s) {
 	*this = n;
 }
 int main() {
+	mint abc = 1;
+	mint akd = 1;
+	abc.shiftx(13);
+	akd.shiftx(4);
+	std::cout << abc.baseten() << "\n" << akd.baseten() << "\n" << (abc-akd).baseten() << "\n\n";
+	std::cout << abc << "\n" << akd << "\n" << (abc-akd) << "\n";
+
 	mint joe;
+
 	joe.set_str("69420128397128937819272389473924723984");
 	mint pork;
 	pork.set_str("172812763816736182393179282748397824723947239482343");
