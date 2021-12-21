@@ -42,10 +42,8 @@ mint prho(mint n) {
 				k*=2;
 				y = x;
 			}
-			std::cout << cnt << "\n";
 		}
 		c++;
-		std::cout << "new c: " << c << "\n";
 	}
 }
 
@@ -54,11 +52,13 @@ int main() {
 	mint ajaja = 399899999999999LL;
 	mint bbbb;
 	bbbb.set_str("19326223710861634601");
+	mint kakaa = "19326223710861634";
+	mint two = 2LL;
 
-	std::cout << prho(bbbb) << "\n";
+	std::cout << prho(kakaa/two) << "\n";
 	clock_t end = clock();
 
-	printf("took %lf seconds", (double) (end-start)/CLOCKS_PER_SEC);
+	printf("took %lf seconds\n", (double) (end-start)/CLOCKS_PER_SEC);
 
 	mpz_t joe;
 	mpz_init(joe);

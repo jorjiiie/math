@@ -14,11 +14,9 @@ mint::mint(std::string s) {
 	for (char c : s) {
 		n*=10;
 		n+=(long long)(c-'0');
-		std::cout << n << " " << c << " " << (c-'0') << " \n";
 	}
 
 	*this = n;
-	std::cout << (*this) << " " << n << "\n";
 }
 mint::mint(long long n) {
 	// this can be like pretty big
@@ -35,7 +33,7 @@ mint::mint(long long n) {
 }
 
 mint::mint(const char* c) {
-	mint(std::string(c));
+	*this = mint(std::string(c));
 }
 mint::mint(const mint& k) {
 	this->num=k.num;
