@@ -18,6 +18,7 @@ mint::mint(std::string s) {
 
 	*this = n;
 }
+
 mint::mint(long long n) {
 	// this can be like pretty big
 	if (n<0) {
@@ -50,6 +51,8 @@ mint& mint::operator+=(const mint& k) {
 	// hopefully this doesn't create memory leaks 
 	mint tmp = k;
 	// inefficient but I'm too lazy (for now) to impl a case for this and we just have the carry digit go over
+	tmp.clean();
+	*this.clean();
 	while (tmp.num.size()<this->num.size()) {
 		tmp.num.push_back(0);
 	}
@@ -309,7 +312,7 @@ void mint::changeBit(int k, bool b) {
 	k-=block*31;
 	num[block]&=(~0&((int)b<<k));
 }  
-void mint::clean() {
+inline void mint::clean() {
 	while (!(this->num.empty())&&this->num.back()==0) {
 		this->num.pop_back();
 	}
