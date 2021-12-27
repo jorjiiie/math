@@ -5,7 +5,12 @@
 
 #include <gmpxx.h>
 
+// really got nothing today just doing college apps :(
 using namespace std;
+
+#define LINE printf("c: %d\n",__LINE__)
+
+
 
 int main() {
 	mpz_class a,b,c;
